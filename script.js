@@ -17,7 +17,7 @@ class Tree {
         copyArray.sort((a,b) => a - b);
         copyArray = [...new Set(copyArray)]
         let start = 0;
-        let end = array.length - 1;
+        let end = copyArray.length - 1;
         const tree = this.createTree(copyArray, start, end);
         return tree;
         }
@@ -32,48 +32,66 @@ class Tree {
      return newNode;
     }
    insert(data) {
-    const node = this.root;
-    if(node === null) {
-        this.root = new Node(data);
-        return;
+    const newNode = new Node(data);
+    if(this.root === null) {
+        this.root = newNode;
+        return this;
+    }
+
+    let current = this.root;
+    while(current) {
+        if(data === current.data) {
+            return undefined;
+        }
+        if(data < current.data) {
+            if(current.left === null) {
+                current.left = newNode;
+                return this;
+            }
+            current = current.left
+        } else {
+            if(current.right === null) {
+                current.right = newNode;
+                return this
+            }
+            current = current.right;
+        }
+    }
+   }
+   delete(data) {
+    let current = this.root
+    if(data < current.data && current.left) {
+        current.left = current.left.delete(data);
+    } else if(data > current.data && current.right) {
+        current.right = current.right.delete(data);
     } else {
-        const searchTree = function(node) {
-            if(data < node.data) {
-                if(node.left === null) {
-                    node.left = new Node(data);
-                    return
-                } else if(node.left !== null) {
-                    return searchTree(node.left);
-                }
-            } else if ( data > node.data) {
-                if(node.right === null) {
-                    node.right = new Node(data);
-                } else if(node.right !== null) {
-                    return searchTree(node.right)
-                }
+        if(data === current.data) {
+            if(current.right && current.left) {
+                let minVal = current.right.findMin();
+                current.data = minVal;
+                current.right = current.right.delete(minVal)
+            }
+            else if(current.left) {
+                return current.left;
+            } else if(current.right) {
+                return current.right
             } else {
                 return null;
             }
         }
-        return searchTree(node);
+        return current
     }
-   }
-   delete(root, data) {
-    if(root === null) {
-        return root;
-    }
-    if(key < root.key) {
-        root.left = this.delete(root.left, data);
-    } else if(key > root.key) {
-        root.right = this.delete(root.right, data);
+}
+
+findMin() {
+    let current = this.root
+    if(current.left) {
+        return current.left.findMin();
     } else {
-        if(root.left === null) {
-            return root.right;
-        } else if(root.right === null) {
-            return root.left;
-        }
+        return current.data;
     }
-   }
+}
+
    find(data) {
     let current = this.root;
     while(current) {
@@ -88,33 +106,49 @@ class Tree {
     }
     return current;
    }
-   *levelOrder() {
-    const queue = [];
-    if(this.root) {
-        queue.push(this.root);
-        while (queue.length) {
-            const node = queue.shift();
-            yield node.nodeValue;
-            if(node.left) {
-                queue.push(node.left)
-            } else if(node.right) {
-                queue.push(node.right)
-            }
-            this.height++
-        }
-    }
-   }
+  levelOrder(callback) {
+    let queue = [];
 
-   inOrder() {
-    let current = this.root;
-    if(current === null) {
-        return;
+    let nextNode = this.root;
+
+    queue.push(nextNode);
+
+    while(queue.length>0) {
+        nextNode = queue.shift();
+
+        if(nextNode.left) {
+            queue.push(nextNode.left);
+        }
+
+        if(nextNode.right) {
+            queue.push(nextNode.right)
+        }
+
+        callback(nextNode.data);
     }
-   }
+
+  }
 }
 
 const array = [1,7,4,23,8,9,4,3,5,7,8,67,6345,324];
 const treeTest = new Tree(array);
 
+console.log(treeTest.insert(18))
+treeTest.delete(67)
 console.log(treeTest.buildTree(array))
-console.log(treeTest.find(3))
+
+
+const prettyPrint = (node, prefix = "", isLeft = true) => {
+    if (node === null) {
+      return;
+    }
+    if (node.right !== null) {
+      prettyPrint(node.right, `${prefix}${isLeft ? "│   " : "    "}`, false);
+    }
+    console.log(`${prefix}${isLeft ? "└── " : "┌── "}${node.data}`);
+    if (node.left !== null) {
+      prettyPrint(node.left, `${prefix}${isLeft ? "    " : "│   "}`, true);
+    }
+  };
+ 
+  prettyPrint(treeTest.root)
