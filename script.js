@@ -200,8 +200,8 @@ rebalance() {
     }
     let nodes = [];
     this.inOrder((node) => nodes.push(node.data));
-
-   this.root = this.buildTree(nodes);
+    
+    this.root = this.buildTree(nodes);
 }
 
 }
@@ -233,9 +233,5 @@ const prettyPrint = (node, prefix = "", isLeft = true) => {
     }
   };
  
-  treeTest.inOrder((node) => console.log(node.data))
   prettyPrint(treeTest.root);
-console.log(treeTest.isBalanced(treeTest.root));
-  
-
-  
+  console.log(treeTest.isBalanced(treeTest.root));
